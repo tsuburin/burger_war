@@ -217,10 +217,10 @@ docker-compose down
 コンテナは使い終わるたびに破棄するような使い方を想定しているのですが、いくつかのデータは継続して使えたほうが便利かと思い次回コンテナ起動時にも引き継ぐようにしています。
 具体的には、以下のディレクトリです。
 
-| パス                    | 説明                         |
-|:------------------------|------------------------------|
-| `/home/burger/.gazebo/` | gazeboのモデルデータ等       |
-| `/home/burger/build`    | catkin_makeのbuild directory |
-| `/home/burger/devel`    | catkin_makeのdevel directory |
+| パス                            | 説明                    |
+|:--------------------------------|-------------------------|
+| `/home/burger/.gazebo/`         | gazeboのモデルデータ等  |
+| `/home/burger/catkin_ws/build/` | catkinのbuild directory |
+| `/home/burger/catkin_ws/devel/` | catkinのdevel directory |
 
 コンテナ終了時にこれらのデータも削除したい場合は、`docker-compose down`のかわりに`docker-compose down -v`を実行してください。
