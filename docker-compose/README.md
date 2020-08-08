@@ -31,7 +31,7 @@ GUIレンダリングは`/tmp/X11-unix`と`/dev/dri`を共有してDRMで行い�
 ## 依存ソフトウェア
 
 * Docker Composeのfile format 3.7以上に対応したDocker EngineとDocker Compose  
-    https://docs.docker.com/compose/compose-file/compose-versioning/#versioning などを参考にインストールしてください。  
+    https://docs.docker.com/compose/compose-file/compose-versioning/#compatibility-matrix などを参考にインストールしてください。  
     ディストリビューションのリポジトリ等は確認していないので、動作確認ができれば報告していただけるとありがたいです。
 * xhost  
     コンテナからXサーバーへの接続を許可するために使用します。
