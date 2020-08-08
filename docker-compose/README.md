@@ -168,19 +168,19 @@ docker-compose up -d
 scripts/catkin_make.sh
 
 # 初回であればモデルデータの読み込みのためgazebo起動
-./scripts/exec-in-home.sh gazebo
+scripts/exec-in-home.sh gazebo
 # gazeboを手動で終了
 
 # 公式配布のsim_with_judge.shと同等のコマンドを実行する
 # ターミナルソフトをalacrittyとしているので、必要であれば書き換えてから実行してください
-./scripts/samples/sim_with_judge.sh
+scripts/samples/sim_with_judge.sh
 ```
 
 ターミナル２
 ```sh
 # ロボット動作スクリプトを実行
 cd $REPO
-./docker-compose/scripts/exec-here.sh bash scripts/start.sh
+docker-compose/scripts/exec-here.sh bash scripts/start.sh
 ```
 
 終了する際は、実行中のプロセスをCtrl-C等で止めたあと、いずれかのターミナルで、
