@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 script_dir=$(cd $(dirname $0) && pwd)
 compose_dir=$(cd $script_dir/.. && pwd)
 
