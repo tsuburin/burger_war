@@ -7,7 +7,7 @@ burger_warの環境を立ち上げるdocker-composeと、補助スクリプト�
 
 コンテ内に入って作業するのではなく、ホスト環境に置かれたリポジトリをコンテナ内にマウントして、
 ホストから通常のスクリプト実行のような感覚でコンテナ内のコマンドが実行できるような作りにしています。
-[使い方](#使い方)と[コンテナ環境について](#コンテナ環境について)を読んでもらうとなんとなくわかるかもしれません。
+[使用例](#使用例)と[コンテナ環境について](#コンテナ環境について)を読んでもらうとなんとなくわかるかもしれません。
 
 CUIコマンドは`docker-compose exex`を介して行うので、普段使っているターミナル等でそのまま実行できます。
 GUIレンダリングは`/tmp/X11-unix`と`/dev/dri`を共有してDRMで行います。
@@ -112,17 +112,10 @@ COMMANDはシェルを介さず実行されます。
     * `exec-here.sh`: リポジトリ内で実行した場合、現在のディレクトリに対応するコンテナ内のディレクトリでコマンドを実行します。
 * `catkin_make.sh`: `/home/burger/catkin_ws`で`catkin_make`を実行します。引数はそのまま`catkin_make`の引数として渡されます。
 
-例として、 **このリポジトリのルートディレクトリにいるホストから** 、`burger_war/scripts/sim_with_judge.sh`と同等のコマンドを実行する場合は以下のようになります。  
-ただし、`alacritty`は作者環境でのターミナルソフトです。各自の環境に合わせて置き換えてください。
+`scripts/samples/sim_with_judge.sh`は公式配布スクリプトの`scripts/sim_with_judge.sh`と同等のコマンドを実行するスクリプト例です。  
+ただし、`alacritty`は作者環境でのターミナルソフトです。各自の環境に合わせて置き換えてください。  
+[使用例](#使用例)も参照してください。
 
-```sh
-alacritty -e docker-compose/scripts/exec-here.sh python judge/judgeServer.py &
-alacritty -e docker-compose/scripts/exec-here.sh python judge/visualizeWindow.py &
-
-docker-compose/scripts/exec-here.sh bash judge/test_scripts/init_single_play.sh judge/marker_set/sim.csv localhost:5000 you enemy
-
-docker-compose/scripts/exec-here.sh roslaunch burger_war setup_sim.launch
-```
 
 ---
 
@@ -142,6 +135,53 @@ docker-compose exec burger bash
 
 ```sh
 docker-compose down 
+```
+
+---
+
+### 使用例
+
+この使用例は[メインREADME](../README.md)の`サンプルの実行`と対応しています。
+
+前提として、
+
+* [準備](#準備)が終わっている
+* このリポジトリのパスは`$REPO`
+
+とします。
+
+以下のコマンドはすべてホスト側で行います。
+
+ターミナル１
+```sh
+# コンテナ起動
+cd $REPO/docker-compose
+docker-compose up -d
+
+# 必要であればcatkin_makeを実行
+# 少なくとも初回は必要(コンテナ作成ではメインREADMEの5. makeは実行されないため)
+scripts/catkin_make.sh
+
+# 初回であればモデルデータの読み込みのためgazebo起動
+./scripts/exec-in-home.sh gazebo
+# gazeboを手動で終了
+
+# 公式配布のsim_with_judge.shと同等のコマンドを実行する
+# ターミナルソフトをalacrittyとしているので、必要であれば書き換えてから実行してください
+./scripts/samples/sim_with_judge.sh
+```
+
+ターミナル２
+```sh
+# ロボット動作スクリプトを実行
+cd $REPO
+./docker-compose/scripts/exec-here.sh bash scripts/start.sh
+```
+
+終了する際は、実行中のプロセスをCtrl-C等で止めたあと、いずれかのターミナルで、
+```sh
+cd $REPO/docker-compose
+docker-compose down
 ```
 
 ---
