@@ -1,27 +1,26 @@
 FROM osrf/ros:kinetic-desktop-full-xenial
 
-# gazebo7のアップデート
-RUN sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
-RUN apt-get update && apt-get install -y wget
-RUN wget http://packages.osrfoundation.org/gazebo.key -O - | apt-key add -
-
-# 依存パッケージインストール
+# gazebo7のアップデート & 依存パッケージインストール
 #
 # dbusについて
 #   ときどきコマンド実行時に/etc/machine-idがないと怒られることがあるので
 #   dbus-uuidgenコマンドでそれを生成するのに使用する
 #     免責事項：この怒られの原因は理解していないので、この対処法が正しいという保証はないです。
-RUN apt-get update && \
-      apt-get upgrade -y && \
-      apt-get install -y \
-      python-pip \
-      ros-kinetic-turtlebot3 \
-      ros-kinetic-turtlebot3-msgs \
-      ros-kinetic-turtlebot3-simulations \
-      ros-kinetic-aruco-ros \
-      gazebo7 \
-      dbus && \
-      rm -rf /var/lib/apt/lists/*
+RUN echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" \
+      > /etc/apt/sources.list.d/gazebo-stable.list \
+    && apt-get update && apt-get install -y wget \
+    && wget http://packages.osrfoundation.org/gazebo.key -O - | apt-key add - \
+    && apt-get update \
+    && apt-get upgrade -y \
+    && apt-get install -y \
+         python-pip \
+         ros-kinetic-turtlebot3 \
+         ros-kinetic-turtlebot3-msgs \
+         ros-kinetic-turtlebot3-simulations \
+         ros-kinetic-aruco-ros \
+         gazebo7 \
+         dbus \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN pip install requests flask
 
