@@ -28,6 +28,7 @@ services:
         source: catkin-devel
         target: /home/burger/catkin_ws/devel
     tty: true
+    init: true
 
 volumes:
   gazebo-cache:

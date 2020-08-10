@@ -1,0 +1,5 @@
+#!/bin/bash
+
+cd $BURGER_WAR_REPO
+
+bash scripts/start.sh "$@"

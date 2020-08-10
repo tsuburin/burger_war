@@ -40,15 +40,18 @@ USER burger
 ENV GAZEBO_MODEL_PATH=/home/burger/catkin_ws/src/burger_war/burger_war/models/
 ENV TURTLEBOT3_MODEL=burger
 ENV QT_X11_NO_MITSHM=1
+ENV CATKIN_WS=/home/burger/catkin_ws
+ENV BURGER_WAR_REPO=/home/burger/catkin_ws/src/burger_war
 
-RUN mkdir /home/burger/.gazebo && \
-      mkdir -p /home/burger/catkin_ws/src && \
-      cd /home/burger/catkin_ws/src && \
-      echo "source /opt/ros/kinetic/setup.bash" >> ~/.bashrc && \
-      bash -i -c "catkin_init_workspace" && \
-      cd /home/burger/catkin_ws && \
-      bash -i -c "catkin_make" && \
-      echo "source /home/burger/catkin_ws/devel/setup.bash" >> ~/.bashrc
+RUN mkdir /home/burger/.gazebo \
+    && mkdir -p /home/burger/catkin_ws/src \
+    && cd /home/burger/catkin_ws/src \
+    && echo "source /opt/ros/kinetic/setup.bash" >> ~/.bashrc \
+    && bash -i -c "catkin_init_workspace" \
+    && cd /home/burger/catkin_ws \
+    && bash -i -c "catkin_make" \
+    && echo "source /home/burger/catkin_ws/devel/setup.bash" >> ~/.bashrc \
+    && echo 'export PATH=$BURGER_WAR_REPO/docker-compose/bin:$PATH' >> ~/.bashrc
 
 # 各チーム固有のパッケージを追加する場合は、このコメントブロックをアンコメントして行うことを推奨します。
 # 頻繁に変更がある可能性があるコマンドはDockerfileの下流で行うことで上流のビルドキャッシュがそのまま使えるからです。

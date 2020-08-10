@@ -1,0 +1,24 @@
+#!/bin/bash
+
+set -e
+
+trap 'kill -s SIGTERM $(jobs -p | sed "s/^/-/") && wait' SIGINT SIGTERM
+
+cd $CATKIN_WS
+catkin_make
+
+cd $BURGER_WAR_REPO
+
+setsid redirect-to-tempfile python judge/judgeServer.py &
+setsid redirect-to-tempfile python judge/visualizeWindow.py &
+
+while !curl localhost:5000 &> /dev/null; do
+  # judgeServerの起動待ち
+  sleep 1
+done
+
+redirect-to-tempfile bash judge/test_scripts/init_single_play.sh judge/marker_set/sim.csv localhost:5000 you enemy
+
+setsid redirect-to-tempfile roslaunch burger_war setup_sim.launch &
+
+wait
