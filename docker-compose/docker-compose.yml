@@ -43,6 +43,10 @@ services:
         source: ${HOME:?}/.config/nvim
         target: /home/burger/.config/nvim
         read_only: true
+      - type: bind
+        source: ${HOME:?}/.gitconfig
+        target: /home/burger/.gitconfig
+        read_only: true
     tty: true
     init: true
 
