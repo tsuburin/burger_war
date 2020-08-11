@@ -1,4 +1,4 @@
-FROM osrf/ros:kinetic-desktop-full-xenial
+FROM osrf/ros:kinetic-desktop-full-xenial AS burger
 
 # gazebo7のアップデート & 依存パッケージインストール
 #
@@ -31,11 +31,12 @@ CMD ["bash"]
 
 ARG UID
 ARG GID
-RUN groupadd -g ${GID:?} burger && useradd -m -u ${UID:?} -g burger burger
+RUN groupadd -g ${GID:?} burger && useradd -m -s /bin/bash -u ${UID:?} -g burger burger
 
 RUN echo "burger ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 USER burger
+WORKDIR /home/burger
 
 ENV GAZEBO_MODEL_PATH=/home/burger/catkin_ws/src/burger_war/burger_war/models/
 ENV TURTLEBOT3_MODEL=burger
@@ -53,17 +54,27 @@ RUN mkdir /home/burger/.gazebo \
     && echo "source /home/burger/catkin_ws/devel/setup.bash" >> ~/.bashrc \
     && echo 'export PATH=$BURGER_WAR_REPO/docker-compose/bin:$PATH' >> ~/.bashrc
 
-# 各チーム固有のパッケージを追加する場合は、このコメントブロックをアンコメントして行うことを推奨します。
-# 頻繁に変更がある可能性があるコマンドはDockerfileの下流で行うことで上流のビルドキャッシュがそのまま使えるからです。
-# 
-# USER root
-# RUN apt-get update && \
-#       apt-get install -y \
-#       YOUR_PACKAGE_1 \
-#       YOUR_PACKAGE_2 \
-#       ... && \
-#       rm -rf /var/lib/apt/lists/*
-# USER burger
+FROM burger as developer
 
-WORKDIR /home/burger
+# 開発環境インストール
+USER root
+RUN apt-get update \
+    && apt-get install -y \
+      software-properties-common \
+      apt-transport-https \
+    && add-apt-repository ppa:neovim-ppa/stable \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update \
+    && apt-get install -y \
+         neovim \
+         python3.7 \
+    && bash -c "python3.7 <(curl https://bootstrap.pypa.io/get-pip.py)" \
+    && pip3.7 install neovim \
+    && bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)" llvm.sh 10 \
+    && ln -s $(which clangd-10) /usr/local/bin/clangd \
+    && rm -rf /var/lib/apt/lists/*
 
+USER burger
+WORKDIR /home/burger/catkin_ws
+RUN ln -s build/compile_commands.json ./
+WORKDIR /home/burger/catkin_ws/src/burger_war

@@ -3,7 +3,8 @@ version: "3.7"
 services:
   burger:
     build:
-      context: ./burger/
+      context: ./burger
+      target: burger
       args:
         UID: ${UID:?}
         GID: ${GID:?}
@@ -21,16 +22,30 @@ services:
       - type: volume
         source: gazebo-cache
         target: /home/burger/.gazebo
+    tty: true
+    init: true
+
+  burger-developer:
+    build:
+      context: ./burger
+      target: developer
+      args:
+        UID: ${UID:?}
+        GID: ${GID:?}
+    volumes:
+      - type: bind
+        source: ../
+        target: /home/burger/catkin_ws/src/burger_war
       - type: volume
-        source: catkin-build
-        target: /home/burger/catkin_ws/build
-      - type: volume
-        source: catkin-devel
-        target: /home/burger/catkin_ws/devel
+        source: developer-home
+        target: /home/burger
+      - type: bind
+        source: ${HOME:?}/.config/nvim
+        target: /home/burger/.config/nvim
+        read_only: true
     tty: true
     init: true
 
 volumes:
   gazebo-cache:
-  catkin-build:
-  catkin-devel:
+  developer-home:

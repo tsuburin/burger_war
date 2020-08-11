@@ -1,0 +1,5 @@
+#!/bin/bash
+
+cd $CATKIN_WS
+
+catkin_make "$@"
