@@ -36,7 +36,6 @@ RUN groupadd -g ${GID:?} burger && useradd -m -s /bin/bash -u ${UID:?} -g burger
 RUN echo "burger ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 USER burger
-WORKDIR /home/burger
 
 ENV GAZEBO_MODEL_PATH=/home/burger/catkin_ws/src/burger_war/burger_war/models/
 ENV TURTLEBOT3_MODEL=burger
@@ -53,6 +52,15 @@ RUN mkdir /home/burger/.gazebo \
     && bash -i -c "catkin_make" \
     && echo "source /home/burger/catkin_ws/devel/setup.bash" >> ~/.bashrc \
     && echo 'export PATH=$BURGER_WAR_REPO/docker-compose/bin:$PATH' >> ~/.bashrc
+
+USER root
+RUN apt-get update \
+    && apt-get install -y \
+         ros-kinetic-dwa-local-planner \
+    && rm -rf /var/lib/apt/lists/*
+
+USER burger
+WORKDIR /home/burger
 
 FROM burger as developer
 
