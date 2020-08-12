@@ -5,7 +5,6 @@ if [[ $# -lt 1 ]]; then
 fi
 
 stdout=$(mktemp --tmpdir $$.stdout.XXXXXXXXXX)
-stderr=$(mktemp --tmpdir $$.stderr.XXXXXXXXXX)
 
-echo "redirect: $* > $stdout 2> $stderr"
-exec "$@" > $stdout 2> $stderr
+echo "redirect: $* > $stdout"
+exec "$@" > $stdout
