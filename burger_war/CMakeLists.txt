@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(burger_war)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -208,3 +209,6 @@ include_directories(
 
 add_executable(randomRun src/randomRun.cpp)
 target_link_libraries(randomRun ${catkin_LIBRARIES})
+
+add_executable(simpleScan src/simpleScan.cpp)
+target_link_libraries(simpleScan ${catkin_LIBRARIES})
