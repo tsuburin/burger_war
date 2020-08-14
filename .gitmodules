@@ -1,3 +1,6 @@
 [submodule "burger_war/vendor/nlohmann_json"]
 	path = burger_war/vendor/nlohmann_json
 	url = https://github.com/nlohmann/json.git
+[submodule "burger_war/vendor/eigen"]
+	path = burger_war/vendor/eigen
+	url = https://gitlab.com/libeigen/eigen.git
