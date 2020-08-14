@@ -1,0 +1,8 @@
+Language: Cpp
+BasedOnStyle: Google
+
+AlignAfterOpenBracket: AlwaysBreak
+AllowShortFunctionsOnASingleLine: Empty
+BinPackArguments: false
+BinPackParameters: false
+NamespaceIndentation: All
