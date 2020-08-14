@@ -12,10 +12,14 @@ cd $BURGER_WAR_REPO
 setsid redirect-to-tempfile python judge/judgeServer.py &
 setsid redirect-to-tempfile python judge/visualizeWindow.py &
 
-while !curl localhost:5000 &> /dev/null; do
+# これだとなぜか最初のresetとかが失敗する
+# while !curl localhost:5000 &> /dev/null; do
   # judgeServerの起動待ち
-  sleep 1
-done
+ #  sleep 1
+# done
+
+# ので適当に寝る
+sleep 3
 
 redirect-to-tempfile bash judge/test_scripts/init_single_play.sh judge/marker_set/sim.csv localhost:5000 you enemy
 
