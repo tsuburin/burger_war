@@ -5,6 +5,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11)
 
+set(JSON_BuildTests OFF CACHE INTERNAL "")
+set(JSON_Install OFF CACHE INTERNAL "")
+add_subdirectory(vendor/nlohmann_json)
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -210,5 +214,15 @@ include_directories(
 add_executable(randomRun src/randomRun.cpp)
 target_link_libraries(randomRun ${catkin_LIBRARIES})
 
+add_library(lib_war_state src/lib/war_state.cpp)
+target_link_libraries(lib_war_state ${catkin_LIBRARIES} nlohmann_json::nlohmann_json)
+
 add_executable(simpleScan src/simpleScan.cpp)
 target_link_libraries(simpleScan ${catkin_LIBRARIES})
+
+add_executable(echo_war_state src/echo_war_state.cpp)
+target_link_libraries(echo_war_state
+  ${catkin_LIBRARIES}
+  lib_war_state
+  nlohmann_json::nlohmann_json
+)

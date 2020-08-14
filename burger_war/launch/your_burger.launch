@@ -9,6 +9,12 @@
 
     <node pkg="burger_war" type="randomRun.py" name="randomRun" output="screen"/>
 
+    <node pkg="burger_war" type="echo_war_state" name="echo_war_state" output="screen">
+      <param name="side" value="$(arg side)" />
+      <remap from="input" to="war_state" />
+      <remap from="output" to="war_state_parsed_by_war_state_cpp" />
+    </node>
+
     <!-- END sample program node -->
 
 
