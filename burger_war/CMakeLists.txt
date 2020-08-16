@@ -6,8 +6,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_compile_options(-std=c++11)
 
 ## vendor libraries
-add_subdirectory(vendor/eigen)
-
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 set(JSON_Install OFF CACHE INTERNAL "")
 add_subdirectory(vendor/nlohmann_json)
@@ -25,11 +23,16 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   cv_bridge
   tf
+  tf2
+  tf2_ros
+  tf2_geometry_msgs
 )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
+## for Boost head only libraries
+find_package(Boost REQUIRED)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -218,10 +221,13 @@ add_executable(randomRun src/randomRun.cpp)
 target_link_libraries(randomRun ${catkin_LIBRARIES})
 
 add_library(lib_war_state src/lib/war_state.cpp)
-target_link_libraries(lib_war_state ${catkin_LIBRARIES} nlohmann_json::nlohmann_json)
+target_link_libraries(lib_war_state nlohmann_json::nlohmann_json)
 
-add_executable(simpleScan src/simpleScan.cpp)
-target_link_libraries(simpleScan ${catkin_LIBRARIES})
+add_executable(simple_scan src/simple_scan.cpp)
+target_link_libraries(simple_scan
+  ${catkin_LIBRARIES}
+  lib_war_state
+)
 
 add_executable(echo_war_state src/echo_war_state.cpp)
 target_link_libraries(echo_war_state

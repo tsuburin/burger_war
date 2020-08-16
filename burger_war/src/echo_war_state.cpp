@@ -1,11 +1,9 @@
-#include <ros/ros.h>
-#include <std_msgs/String.h>
-
-#include <nlohmann/json.hpp>
-
 #include "lib/war_state.hpp"
+#include "nlohmann/json.hpp"
 #include "ros/publisher.h"
+#include "ros/ros.h"
 #include "ros/subscriber.h"
+#include "std_msgs/String.h"
 
 // lib/war_state.{cpp, hpp} のテスト用ノード
 // inputを審判サーバーからパブリッシュされるwar_stateとして読んで、

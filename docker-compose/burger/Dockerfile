@@ -43,10 +43,11 @@ ENV QT_X11_NO_MITSHM=1
 ENV CATKIN_WS=/home/burger/catkin_ws
 ENV BURGER_WAR_REPO=/home/burger/catkin_ws/src/burger_war
 
-RUN mkdir /home/burger/.gazebo \
+RUN echo "source /opt/ros/kinetic/setup.bash" >> ~/.bashrc \
+    && rosdep update \
+    && mkdir /home/burger/.gazebo \
     && mkdir -p /home/burger/catkin_ws/src \
     && cd /home/burger/catkin_ws/src \
-    && echo "source /opt/ros/kinetic/setup.bash" >> ~/.bashrc \
     && bash -i -c "catkin_init_workspace" \
     && cd /home/burger/catkin_ws \
     && bash -i -c "catkin_make" \
@@ -57,6 +58,7 @@ USER root
 RUN apt-get update \
     && apt-get install -y \
          ros-kinetic-dwa-local-planner \
+         ros-kinetic-geometry2 \
     && rm -rf /var/lib/apt/lists/*
 
 USER burger

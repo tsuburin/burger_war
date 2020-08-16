@@ -2,22 +2,105 @@
 <launch>
   <arg name="side" default="r"/> <!-- "b" = blue side, "r" = red side  -->
 
-    <!-- You can change control program  -->
+  <!-- You can change control program  -->
+
+  <!-- model data  -->
+  <param name="robot_state_publisher_frequency" value="1" />
+
+  <param name="red_robot_description" command="$(find xacro)/xacro --inorder $(find burger_war)/models/red_bot.urdf.xacro" />
+  <param name="red_robot_state_tf_prefix" value="red_robot_estimated_state" />
+  <node pkg="robot_state_publisher" type="state_publisher" name="red_robot_state_pub">
+    <remap from="robot_description" to="red_robot_description" />
+    <remap from="joint_states" to="red_robot_joint_states" />
+    <remap from="tf_prefix" to="red_robot_state_tf_prefix" />
+    <remap from="publish_frequency" to="robot_state_publisher_frequency" />
+  </node>
+
+  <param name="blue_robot_description" command="$(find xacro)/xacro --inorder $(find burger_war)/models/blue_bot.urdf.xacro" />
+  <param name="blue_robot_state_tf_prefix" value="blue_robot_estimated_state" />
+  <node pkg="robot_state_publisher" type="state_publisher" name="blue_robot_state_pub">
+    <remap from="robot_description" to="blue_robot_description" />
+    <remap from="joint_states" to="blue_robot_joint_states" />
+    <remap from="tf_prefix" to="blue_robot_state_tf_prefix" />
+  </node>
+  <!-- end of model data  -->
+
+  <!-- my robot -->
+  <node pkg="burger_war" type="simple_scan" name="simple_scan" output="screen">
+    <param name="side" value="$(arg side)" />
+    <remap from="pose_with_covariance" to="amcl_pose" />
+  </node>
+  <!-- end of my robot -->
+
+  <!-- targets
+  法線方向が +z, 鉛直上向きが+yになるようにとる
+  -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="red_left_tag"
+    args="0 0 0 0 0 0 1 red_robot_estimated_state/tag1 red_left_tag">
+  </node>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="red_right_tag"
+    args="0 0 0 0 0 0 1 red_robot_estimated_state/tag2 red_right_tag">
+  </node>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="red_back_tag"
+    args="0 0 0 0 0 0 1 red_robot_estimated_state/tag3 red_back_tag">
+  </node>
+
+  <node pkg="tf2_ros" type="static_transform_publisher" name="blue_left_tag"
+    args="0 0 0 0 0 0 1 blue_robot_estimated_state/tag1 blue_left_tag">
+  </node>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="blue_right_tag"
+    args="0 0 0 0 0 0 1 blue_robot_estimated_state/tag2 blue_right_tag">
+  </node>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="blue_back_tag"
+    args="0 0 0 0 0 0 1 blue_robot_estimated_state/tag3 blue_back_tag">
+  </node>
+
+  <node pkg="tf2_ros" type="static_transform_publisher" name="tomato_n_tag"
+    args="0.075 0 0.1 0.5 0.5 0.5 0.5 tomato tomato_n_tag">
+  </node>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="tomato_s_tag"
+    args="-0.075 0 0.1 0.5 -0.5 -0.5 0.5 tomato tomato_s_tag">
+  </node>
+
+  <node pkg="tf2_ros" type="static_transform_publisher" name="omelette_n_tag"
+    args="0.075 0 0.1 0.5 0.5 0.5 0.5 omelette omelette_n_tag">
+  </node>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="omelette_s_tag"
+    args="-0.075 0 0.1 0.5 -0.5 -0.5 0.5 omelette omelette_s_tag">
+  </node>
+
+  <node pkg="tf2_ros" type="static_transform_publisher" name="pudding_n_tag"
+    args="0.075 0 0.1 0.5 0.5 0.5 0.5 pudding pudding_n_tag">
+  </node>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="pudding_s_tag"
+    args="-0.075 0 0.1 0.5 -0.5 -0.5 0.5 pudding pudding_s_tag">
+  </node>
+
+  <node pkg="tf2_ros" type="static_transform_publisher" name="octopus_wiener_n_tag"
+    args="0.075 0 0.1 0.5 0.5 0.5 0.5 octopus_wiener octopus_wiener_n_tag">
+  </node>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="octopus_wiener_s_tag"
+    args="-0.075 0 0.1 0.5 -0.5 -0.5 0.5 octopus_wiener octopus_wiener_s_tag">
+  </node>
+
+  <node pkg="tf2_ros" type="static_transform_publisher" name="fried_shrimp_n_tag"
+    args="0.175 0 0.1 0.5 0.5 0.5 0.5 fried_shrimp fried_shrimp_n_tag">
+  </node>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="fried_shrimp_s_tag"
+    args="-0.175 0 0.1 0.5 -0.5 -0.5 0.5 fried_shrimp fried_shrimp_s_tag">
+  </node>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="fried_shrimp_e_tag"
+    args="0 -0.175 0.1 0.70710678118 0 0 0.70710678118 fried_shrimp fried_shrimp_e_tag">
+  </node>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="fried_shrimp_w_tag"
+    args="0 0.175 0.1 0 0.70710678118 0.70710678118 0 fried_shrimp fried_shrimp_w_tag">
+  </node>
+  <!-- end of targets -->
 
 
-    <!-- sample program node -->
+  <include file="$(find burger_navigation)/launch/burger_navigation.launch">
+  </include>
 
-    <node pkg="burger_war" type="randomRun.py" name="randomRun" output="screen"/>
-
-    <node pkg="burger_war" type="echo_war_state" name="echo_war_state" output="screen">
-      <param name="side" value="$(arg side)" />
-      <remap from="input" to="war_state" />
-      <remap from="output" to="war_state_parsed_by_war_state_cpp" />
-    </node>
-
-    <!-- END sample program node -->
-
-
-    <!-- End of your space  -->
+  <!-- End of your space  -->
 </launch>
 
