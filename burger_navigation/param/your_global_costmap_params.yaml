@@ -8,6 +8,6 @@ global_costmap:
 
   static_map: true
 
-  cost_scaling_factor: 1.5
-  inflation_radius: 0.25
+  cost_scaling_factor: 10
+  inflation_radius: 0.50
  

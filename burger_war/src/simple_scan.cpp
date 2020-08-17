@@ -1,7 +1,9 @@
 #include <boost/optional.hpp>
+#include <cstring>
 #include <ctime>
 #include <map>
 #include <memory>
+#include <random>
 #include <sstream>
 #include <string>
 #include <tuple>
@@ -10,8 +12,10 @@
 #include "actionlib/client/simple_action_client.h"
 #include "actionlib/client/simple_client_goal_state.h"
 #include "geometry_msgs/PoseStamped.h"
+#include "geometry_msgs/PoseWithCovariance.h"
 #include "geometry_msgs/PoseWithCovarianceStamped.h"
 #include "geometry_msgs/TransformStamped.h"
+#include "geometry_msgs/Twist.h"
 #include "lib/war_state.hpp"
 #include "move_base_msgs/MoveBaseAction.h"
 #include "move_base_msgs/MoveBaseActionGoal.h"
@@ -174,21 +178,20 @@ find_nearest_takeable_target(
   }
 }
 
-// 自分のものになっていない障害物のタグのうち一番近いところをゴールにする
-move_base_msgs::MoveBaseGoal decide_next_goal(
-    const war_state::State& state,
-    const war_state::Player::Side& my_side,
-    const tf2::Transform& current_transform,
-    const tf2_ros::Buffer& transform_buffer) {
-  // ターゲットから5cm離れたところを目標にする
-  const auto offset = tf2::Transform(
-      tf2::Quaternion(-0.5, 0.5, 0.5, 0.5), tf2::Vector3(0, 0, 0.20));
-  tf2::Transform goal_frame_transform;
-  const auto target = find_nearest_takeable_target(
-      state.targets, current_transform, my_side, transform_buffer);
+move_base_msgs::MoveBaseGoal make_move_base_msg(
+    const boost::optional<std::pair<const war_state::Target*, tf2::Transform>>&
+        target,
+    const tf2::Transform& current_transform) {
+  // ターゲットから20cm離れたところを中心に最大rand_rangeだけランダムにずれた点を目標とする
   if (target) {
-    return from_transform_to_move_base_goal(
-        "map", target.get().second * offset);
+    static std::random_device rnd;
+    static std::mt19937 mt(rnd());
+    constexpr double rand_range = 0.04;
+    std::uniform_real_distribution<> ur(-rand_range, rand_range);
+    const auto offset = tf2::Transform(
+        tf2::Quaternion(-0.5, 0.5, 0.5, 0.5),
+        tf2::Vector3(0 + ur(mt), 0, 0.20));
+    return from_transform_to_move_base_goal("map", target->second * offset);
   } else {
     return from_transform_to_move_base_goal("map", current_transform);
   }
@@ -224,27 +227,6 @@ int main(int argc, char** argv) {
         }
       });
 
-  // マップ内の現在位置
-  tf2::Transform current_transform = [&]() {
-    switch (my_side) {
-      case war_state::Player::Side::Red:
-        return red_robot_initial_transform;
-      case war_state::Player::Side::Blue:
-        return blue_robot_initial_transform;
-    }
-  }();
-  const auto current_transform_sub =
-      n.subscribe<geometry_msgs::PoseWithCovarianceStamped>(
-          "pose_with_covariance",
-          100,
-          [&](const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg) {
-            const auto& position = msg->pose.pose.position;
-            current_transform.setOrigin({position.x, position.y, position.z});
-            const auto& orientation = msg->pose.pose.orientation;
-            current_transform.setRotation(
-                {orientation.x, orientation.y, orientation.z, orientation.w});
-          });
-
   tf2_ros::Buffer transform_buffer;
   tf2_ros::TransformListener transform_listener(transform_buffer);
 
@@ -256,6 +238,32 @@ int main(int argc, char** argv) {
   tf2::Transform octopus_wiener_transform = octopus_wiener_initial_transform;
   tf2::Transform fried_shrimp_transform = fried_shrimp_initial_transform;
 
+  // マップ内の現在位置
+  const auto current_transform = [&]() -> tf2::Transform& {
+    switch (my_side) {
+      case war_state::Player::Side::Red:
+        return red_robot_estimated_transform;
+      case war_state::Player::Side::Blue:
+        return blue_robot_estimated_transform;
+    }
+  };
+  double current_covariance[6][6];
+  const auto current_transform_sub =
+      n.subscribe<geometry_msgs::PoseWithCovarianceStamped>(
+          "pose_with_covariance",
+          100,
+          [&](const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg) {
+            const auto& position = msg->pose.pose.position;
+            current_transform().setOrigin({position.x, position.y, position.z});
+            const auto& orientation = msg->pose.pose.orientation;
+            current_transform().setRotation(
+                {orientation.x, orientation.y, orientation.z, orientation.w});
+            memcpy(
+                current_covariance,
+                &msg->pose.covariance,
+                sizeof(current_covariance));
+          });
+
   const auto broadcast_transform = [&](const std::string& name,
                                        const tf2::Transform t) {
     static tf2_ros::TransformBroadcaster br;
@@ -266,7 +274,7 @@ int main(int argc, char** argv) {
     msg.child_frame_id = name;
     br.sendTransform(msg);
   };
-  const auto broadcast_obstacles = [&]() {
+  const auto broadcast_estimations = [&]() {
     broadcast_transform(
         "red_robot_estimated_state/base_footprint",
         red_robot_estimated_transform);
@@ -285,18 +293,47 @@ int main(int argc, char** argv) {
   while (!move_base_action_client.waitForServer(ros::Duration(5.0))) {
     ROS_INFO("Waiting for the move_base action server to come up");
   }
-  move_base_action_client.sendGoal(
-      decide_next_goal(state, my_side, current_transform, transform_buffer));
+
+  auto set_next_goal = [&]() -> boost::optional<std::string> {
+    const auto target = find_nearest_takeable_target(
+        state.targets, current_transform(), my_side, transform_buffer);
+    move_base_action_client.sendGoal(
+        make_move_base_msg(target, current_transform()));
+    if (target) {
+      return target->first->name;
+    } else {
+      return boost::none;
+    }
+  };
+
+  auto current_target_name = set_next_goal();
 
   auto rate = ros::Rate(10);
   while (n.ok()) {
+    ros::spinOnce();
+
+    broadcast_estimations();
+
+    if (current_target_name) {
+      const auto target = std::find_if(
+          state.targets.cbegin(),
+          state.targets.cend(),
+          [&](const war_state::Target& target) {
+            return target.name == current_target_name;
+          });
+      if (target != state.targets.cend()) {
+        if (target->owner == static_cast<war_state::Target::Owner>(my_side)) {
+          move_base_action_client.cancelAllGoals();
+        }
+      } else {
+        ROS_ERROR_STREAM(
+            "target " << current_target_name.get() << " not found");
+      }
+    }
     using GoalState = actionlib::SimpleClientGoalState;
     if (move_base_action_client.getState().isDone()) {
-      move_base_action_client.sendGoal(decide_next_goal(
-          state, my_side, current_transform, transform_buffer));
+      current_target_name = set_next_goal();
     }
-    broadcast_obstacles();
-    ros::spinOnce();
     rate.sleep();
   }
 

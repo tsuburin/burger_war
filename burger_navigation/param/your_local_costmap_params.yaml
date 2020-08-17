@@ -8,12 +8,12 @@ local_costmap:
 
   static_map: false  
   rolling_window: true
-  width: 0.5
-  height: 0.5
-  resolution: 0.005
+  width: 0.75
+  height: 0.75
+  resolution: 0.01
 
-  cost_scaling_factor: 1.5
-  inflation_radius: 0.25
+  cost_scaling_factor: 10
+  inflation_radius: 0.50
 
   obstacle_range: 2.0
   raytrace_range: 3.0

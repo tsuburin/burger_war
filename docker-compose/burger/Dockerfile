@@ -72,6 +72,7 @@ RUN apt-get update \
     && apt-get install -y \
       software-properties-common \
       apt-transport-https \
+      imagemagick \
     && add-apt-repository ppa:neovim-ppa/stable \
     && add-apt-repository ppa:deadsnakes/ppa \
     && apt-get update \

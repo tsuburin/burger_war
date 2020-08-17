@@ -11,6 +11,8 @@
   <arg name="initial_pose_x" default="-1.3"/>
   <arg name="initial_pose_y" default="0.0"/>
   <arg name="initial_pose_a" default="0.0"/>
+  <arg name="initial_cov_xx" default="0.04"/>
+  <arg name="initial_cov_yy" default="0.04"/>
 
   <!-- Map server -->
   <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)">
@@ -31,6 +33,8 @@
     <param name="initial_pose_x"            value="$(arg initial_pose_x)"/>
     <param name="initial_pose_y"            value="$(arg initial_pose_y)"/>
     <param name="initial_pose_a"            value="$(arg initial_pose_a)"/>
+    <param name="initial_cov_xx"            value="$(arg initial_cov_xx)"/>
+    <param name="initial_cov_yy"            value="$(arg initial_cov_yy)"/>
     <param name="gui_publish_rate"          value="50.0"/>
 
     <remap from="scan"                      to="$(arg scan_topic)"/>
@@ -68,6 +72,7 @@
     <remap from="cmd_vel" to="$(arg cmd_vel_topic)"/>
     <remap from="odom" to="$(arg odom_topic)"/>
     <param name="DWAPlannerROS/min_vel_x" value="0.0" if="$(arg move_forward_only)" />
+    <param name="DWAPlannerROS/xy_goal_tolerance" value="0.02" />
 
     <param name="local_costmap/global_frame"             value="odom"/>
     <param name="local_costmap/robot_base_frame"             value="base_link"/>
