@@ -99,6 +99,7 @@
 
 
   <include file="$(find burger_navigation)/launch/your_burger_navigation.launch">
+    <arg name="side" value="$(arg side)"/>
   </include>
 
   <!-- End of your space  -->
